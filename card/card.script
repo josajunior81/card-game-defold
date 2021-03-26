@@ -1,0 +1,23 @@
+local db = require "../utils/card_db"
+
+go.property("minion", 0)
+
+function init(self)
+    go.set("#cardart", "scale", vmath.vector3(0.6, 0.6, 1))
+
+    local card_data = db[self.minion]
+
+    label.set_text("#manalabel", "" .. card_data.mana)
+    label.set_text("#attacklabel", "" .. card_data.attack)
+    label.set_text("#healthlabel", "" .. card_data.health)
+    label.set_text("#descriptionlabel", card_data.description)
+
+    msg.post("#cardart", "play_animation", {id = hash(card_data.name)})
+end
+
+function on_message(self, message_id, message)
+    if(message_id == hash("spawn")) then
+        pprint(message.pos)
+        go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, message.pos, go.EASING_INOUTSINE, 0.5)
+    end
+end

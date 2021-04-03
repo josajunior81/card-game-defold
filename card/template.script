@@ -1,0 +1,26 @@
+local camera = require "orthographic.camera"
+
+function init()
+	go.set("#sprite_art", "scale", vmath.vector3(0.6,0.6,1))
+	msg.post("#sprite_back", "disable")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("over") then
+		self.original_pos = go.get_position(".")        
+		go.animate(".", "scale", go.PLAYBACK_ONCE_FORWARD, go.get_scale()*1.8, go.EASING_OUTQUAD, 0.1)
+		self.over_pos = vmath.vector3(self.original_pos.x, self.original_pos.y +100, self.original_pos.z+10)
+		go.set_position(self.over_pos)
+	elseif message_id == hash("out") then
+		go.animate(".", "scale", go.PLAYBACK_ONCE_FORWARD, 1, go.EASING_OUTQUAD, 0.1)
+		go.set_position(self.original_pos)
+	elseif message_id == hash("content") then
+		card_data = message.card_data
+		label.set_text("#manalabel", "" .. card_data.mana)
+		label.set_text("#attacklabel", "" .. card_data.attack)
+		label.set_text("#healthlabel", "" .. card_data.health)
+		label.set_text("#descriptionlabel", card_data.description)
+		label.set_text("#namelabel", card_data.name)
+		msg.post("#sprite_art", "play_animation", {id = hash(card_data.name)})
+	end
+end

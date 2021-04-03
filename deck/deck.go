@@ -81,9 +81,9 @@ embedded_components {
   }
 }
 embedded_components {
-  id: "factory"
-  type: "factory"
-  data: "prototype: \"/card/card.go\"\n"
+  id: "collectionfactory"
+  type: "collectionfactory"
+  data: "prototype: \"/card/card.collection\"\n"
   "load_dynamically: false\n"
   ""
   position {

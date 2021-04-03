@@ -1,0 +1,41 @@
+local WIDTH = tonumber(sys.get_config("display.width"))
+local HEIGHT = tonumber(sys.get_config("display.height"))
+
+local MAX_HAND_SIZE = 8
+local CARD_COUNT = 0
+local CARD_X_OFFSET = 30
+
+local X_RADIUS = WIDTH * 0.25
+local Y_RADIUS = HEIGHT * 0.2
+local ANGLE_FACTOR = -0.1
+
+local CENTER_CARD_OVAL = vmath.vector3(0, -HEIGHT/2 * 0.95, 0)
+
+local LOWER_Y = -((HEIGHT/2) - 80)
+
+local LAST_X = 0
+local LAST_Z = 0
+
+local CAMERA_ID = hash("/camera")
+
+local cards_in_hand = {}
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("spawn") then
+		LAST_Z = LAST_Z + 1.5
+		table.insert(cards_in_hand, {card=message.card, z_pos=LAST_Z})
+		ANGLE_FACTOR = ANGLE_FACTOR + 0.1
+		organize_cards()
+	end
+end
+
+function organize_cards()
+	local angle = math.rad(90) - ANGLE_FACTOR
+	for i=1, #cards_in_hand do
+		local item = cards_in_hand[i]
+		local oval_angle = vmath.vector3((X_RADIUS) * math.cos(angle), Y_RADIUS * math.sin(angle), item.z_pos)
+		local card_pos = oval_angle + CENTER_CARD_OVAL
+		go.animate(item.card, "position", go.PLAYBACK_ONCE_FORWARD, card_pos, go.EASING_INOUTSINE, 0.5)
+		angle = angle + 0.2
+	end
+end

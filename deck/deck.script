@@ -4,19 +4,15 @@ local db = require "../utils/card_db"
 
 function init(self)
     self.card_counter = 0
-    self.next_card_pos = vmath.vector3(0, -300, 0);
-    self.next_card_z = 0
 end
 
 function on_message(self, message_id, message, sender)
     if message_id == cursor.CLICKED then
         local origin_pos = go.get_position()
         self.card_counter = self.card_counter + 1
-        local card_id = factory.create("#factory", origin_pos, nil, {minion = self.card_counter})
-        msg.post(card_id, "spawn", {pos = self.next_card_pos})
-        self.next_card_z = self.next_card_z + 1
-        self.next_card_pos = self.next_card_pos + vmath.vector3(50,0,self.next_card_z)
-
-        
+        local props = {}
+        props[hash("/go")] =  {minion = self.card_counter}
+        local card_id = collectionfactory.create("#collectionfactory", origin_pos, nil, props)
+        msg.post("/hand", "spawn", {card = card_id[hash("/go")]})
     end
 end

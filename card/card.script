@@ -6,13 +6,19 @@ go.property("minion", 0)
 
 function init(self)
     local card_data = db[self.minion]
-    msg.post("template", "content", {card_data = card_data})
+    msg.post("card_art", "content", {card_data = card_data})
+    msg.post("go#collisionobject", "disable")
 end
 
 function on_message(self, message_id, message)
     if message_id == cursor.OVER then
-        msg.post("template", "over")
+        msg.post("card_art", "over")
+        local card = message.id
+        --msg.post("/hand", "add_spacer", {card = card, action = 1})
     elseif message_id == cursor.OUT then
-        msg.post("template", "out")
+        msg.post("card_art", "out")
+        --msg.post("/hand", "add_spacer", {card = card, action = -1})
+    elseif message_id == hash("enable_collision") then
+        msg.post("go#collisionobject", "enable")
     end
 end

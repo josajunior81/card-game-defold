@@ -1,4 +1,5 @@
 local camera = require "orthographic.camera"
+local HEIGHT = tonumber(sys.get_config("display.height"))
 
 function init()
 	go.set("#sprite_art", "scale", vmath.vector3(0.6,0.6,1))
@@ -7,11 +8,12 @@ end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("over") then
-		self.original_pos = go.get_position(".")        
-		go.animate(".", "scale", go.PLAYBACK_ONCE_FORWARD, go.get_scale()*1.8, go.EASING_OUTQUAD, 0.1)
-		self.over_pos = vmath.vector3(self.original_pos.x, self.original_pos.y +100, self.original_pos.z+10)
-		go.set_position(self.over_pos)
+		self.original_pos = go.get_position(".")
+		self.card_size = go.get("#sprite", "size")	
+		self.parent = go.get_parent()
+		go.animate(".", "scale", go.PLAYBACK_ONCE_FORWARD, go.get_scale()*1.2, go.EASING_OUTQUAD, 0.05, 0, end_scale_animate)
 	elseif message_id == hash("out") then
+		go.set_parent(".", self.parent)
 		go.animate(".", "scale", go.PLAYBACK_ONCE_FORWARD, 1, go.EASING_OUTQUAD, 0.1)
 		go.set_position(self.original_pos)
 	elseif message_id == hash("content") then
@@ -23,4 +25,14 @@ function on_message(self, message_id, message, sender)
 		label.set_text("#namelabel", card_data.name)
 		msg.post("#sprite_art", "play_animation", {id = hash(card_data.name)})
 	end
+end
+
+function end_scale_animate(self, url, property)
+	go.set_parent(".")
+	go.set_position(go.get_position(self.parent))
+	local card_pos = go.get(self.parent, "position")
+	local y_pos = ((self.card_size.y) - HEIGHT) + self.card_size.y/2
+	local over_pos = vmath.vector3(card_pos.x, y_pos, 20)
+	pprint(over_pos)
+	go.set(url, "position", over_pos)
 end

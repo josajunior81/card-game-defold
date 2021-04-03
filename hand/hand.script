@@ -9,7 +9,7 @@ local X_RADIUS = WIDTH * 0.25
 local Y_RADIUS = HEIGHT * 0.2
 local ANGLE_FACTOR = -0.1
 
-local CENTER_CARD_OVAL = vmath.vector3(0, -HEIGHT/2 * 0.95, 0)
+local CENTER_CARD_OVAL = vmath.vector3(0, -HEIGHT/2 * 1.25, 0)
 
 local LOWER_Y = -((HEIGHT/2) - 80)
 
@@ -26,16 +26,36 @@ function on_message(self, message_id, message, sender)
 		table.insert(cards_in_hand, {card=message.card, z_pos=LAST_Z})
 		ANGLE_FACTOR = ANGLE_FACTOR + 0.1
 		organize_cards()
+	elseif message_id == hash("add_spacer") then
+		add_spacer(message.card, message.action)
+	end
+end
+
+function add_spacer(card, action)
+	local x_spacer = 50 * -action
+	for i=1, #cards_in_hand do
+		local item = cards_in_hand[i]
+		pprint(item.card, card)
+		if card == item.card then
+			x_spacer = 50 * action
+		else
+			local card_pos = go.get_position(item.card) + vmath.vector3(x_spacer, 0, 0)			
+			go.animate(item.card, "position", go.PLAYBACK_ONCE_FORWARD, card_pos, go.EASING_INOUTSINE, 0.05)
+		end
 	end
 end
 
 function organize_cards()
 	local angle = math.rad(90) - ANGLE_FACTOR
-	for i=1, #cards_in_hand do
+	for i=#cards_in_hand, 1, -1 do
 		local item = cards_in_hand[i]
 		local oval_angle = vmath.vector3((X_RADIUS) * math.cos(angle), Y_RADIUS * math.sin(angle), item.z_pos)
 		local card_pos = oval_angle + CENTER_CARD_OVAL
-		go.animate(item.card, "position", go.PLAYBACK_ONCE_FORWARD, card_pos, go.EASING_INOUTSINE, 0.5)
+		go.animate(item.card, "position", go.PLAYBACK_ONCE_FORWARD, card_pos, go.EASING_INOUTSINE, 0.5, 0, animate_spawn_end)
 		angle = angle + 0.2
 	end
+end
+
+function animate_spawn_end(self, url, property)
+	msg.post(url, "enable_collision")
 end
